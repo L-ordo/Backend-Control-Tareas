@@ -28,13 +28,12 @@ class TareaController extends Controller
                 'usuario_id' => $validatedData['usuario_id'],
                 'titulo' => $validatedData['titulo'],
                 'descripcion' => $validatedData['descripcion'],
-                'completada' => $validatedData['completada'] ?? false,  // Si no se pasa, se asigna como false
+                'completada' => $validatedData['completada'] ?? false,
             ]);
 
-            // Devolver la tarea recién creada
             return response()->json($tarea, 201);
         } catch (\Exception $e) {
-            // Capturar cualquier excepción y devolver un error
+            // captura  cualquier excepción y devuelve un error
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
@@ -67,4 +66,40 @@ class TareaController extends Controller
 
         return response()->json($tareas);
     }
+
+
+    public function markAsCompleted($id)
+        {
+            $task = Tarea::findOrFail($id);
+            $task->completada = true;
+            $task->save();
+
+            return response()->json(['message' => 'Tarea completada con éxito', 'task' => $task]);
+        }
+
+
+        // Actualizar tarea
+    public function update(Request $request, $taskId)
+    {
+        // Obtener la tarea por su ID
+        $task = Tarea::findOrFail($taskId);
+
+        // Validar los datos del request
+        $validated = $request->validate([
+            'titulo' => 'required|string|max:255',
+            'descripcion' => 'required|string',
+            'completada' => 'required|boolean',
+        ]);
+
+        // Actualizar la tarea
+        $task->update([
+            'titulo' => $validated['titulo'],
+            'descripcion' => $validated['descripcion'],
+            'completada' => $validated['completada'],
+        ]);
+
+        // Devolver la tarea actualizada
+        return response()->json($task, 200);
+    }
+
 }

@@ -16,20 +16,32 @@ class UsuarioController extends Controller
         return Usuario::all();
     }
 
-    // Crear un nuevo usuario
-    public function store(Request $request)
-    {
-        $request->validate([
-            'nombre' => 'required|string|max:100',
-            'correo' => 'required|string|email|unique:usuarios,correo|max:100',
-            'password' => 'required|string|max:15',
-        ]);
+   // Crear un nuevo usuario
+   public function store(Request $request)
+   {
+       try {
+           $request->validate([
+               'nombre' => 'required|string|max:100',
+               'correo' => 'required|string|email|unique:usuarios,correo|max:100',
+               'password' => 'required|string|min:6|max:15',
+           ]);
 
-        $usuario = Usuario::create($request->all());
+           // Crea un nuevo usuario con la contraseña tal cual
+           $usuario = new Usuario();
+           $usuario->nombre = $request->nombre;
+           $usuario->correo = $request->correo;
+           $usuario->password = $request->password;
+           $usuario->save();
 
-        return response()->json($usuario, 201);
-    }
-
+           return response()->json($usuario, 201);
+       } catch (\Exception $e) {
+           // Captura cualquier excepción y devuelve un mensaje de error
+           return response()->json([
+               'message' => 'Error al crear el usuario',
+               'error' => $e->getMessage()
+           ], 500);
+       }
+   }
     // Obtener usuario por id
     public function show($id)
     {
@@ -70,7 +82,6 @@ class UsuarioController extends Controller
         // Buscar al usuario por correo
         $user = Usuario::where('correo', $request->correo)->first();
 
-        // Comparar las contraseñas sin usar Hash::check
         if (!$user || $user->password !== $request->password) {
             return response()->json(['success' => false, 'message' => 'Credenciales incorrectas'], 401);
         }

@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('usuario_id')->constrained('usuarios')->onDelete('cascade'); // Relación con usuarios
             $table->string('titulo', 255);
-            $table->text('descripcion')->nullable(); // Permitir que la descripción sea opcional
+            $table->text('descripcion')->nullable();
             $table->boolean('completada')->default(false);
         });
     }
